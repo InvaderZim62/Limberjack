@@ -21,65 +21,33 @@ class LimberjackViewController: UIViewController {
                                        y: Constants.attachmentPoint.y,
                                        width: Constants.viewWidth,
                                        height: Constants.viewHeight))
-    
-    let blockView = UIView(frame: CGRect(x: 50, y: 270, width: 20, height: 20))
 
     let motionManager = CMMotionManager()  // needed to access accelerometers
     
     lazy var animator = UIDynamicAnimator(referenceView: view)
     
-    lazy var collisionBehavior: UICollisionBehavior = {
-        let behavior = UICollisionBehavior()
-        behavior.translatesReferenceBoundsIntoBoundary = true
-        animator.addBehavior(behavior)
-        return behavior
-    }()
-    
-    lazy var itemBehavior: UIDynamicItemBehavior = {
-        let behavior = UIDynamicItemBehavior()
-        behavior.allowsRotation = true
-        behavior.elasticity = 0.7
-        behavior.resistance = 0.5
-        animator.addBehavior(behavior)
-        return behavior
-    }()
-    
-    lazy var gravityBehavior: UIGravityBehavior = {
-        let behavior = UIGravityBehavior()
-        behavior.magnitude = 1.0
-        animator.addBehavior(behavior)
-        return behavior
-    }()
+    lazy var limberjackBehavior = LimberjackBehavior(in: animator)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        blockView.backgroundColor = .black
-        view.addSubview(blockView)
-        
         barView.backgroundColor = .red
         view.addSubview(barView)
         
-        collisionBehavior.addItem(blockView)
-        collisionBehavior.addItem(barView)
-        itemBehavior.addItem(barView)
-        gravityBehavior.addItem(barView)
+        limberjackBehavior.addItem(barView)
 
         let attachment = UIAttachmentBehavior(item: barView,
                                               offsetFromCenter: UIOffset(horizontal: 0, vertical: -Constants.viewHeight / 2),
                                               attachedToAnchor: Constants.attachmentPoint)
         animator.addBehavior(attachment)
-        
-        let push = UIPushBehavior(items: [blockView], mode: .instantaneous)
-        push.angle = 0
-        push.magnitude = 0.1
-        push.action = { [unowned push] in
-            push.dynamicAnimator?.removeBehavior(push)
-        }
-        animator.addBehavior(push)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
 
         // use accelerometers to determine direction of gravity
         if motionManager.isAccelerometerAvailable {
+            limberjackBehavior.gravityBehavior.magnitude = 1.0
             motionManager.accelerometerUpdateInterval = 0.1
             motionManager.startAccelerometerUpdates(to: .main) { (data, error) in
                 if var x = data?.acceleration.x, var y = data?.acceleration.y {
@@ -90,10 +58,16 @@ class LimberjackViewController: UIViewController {
                     case .landscapeLeft: swap(&x, &y); y *= -1
                     default: x = 0; y = 0;
                     }
-                    self.gravityBehavior.gravityDirection = CGVector(dx: x, dy: y)
+                    self.limberjackBehavior.gravityBehavior.gravityDirection = CGVector(dx: x, dy: y)
                 }
             }
         }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        limberjackBehavior.gravityBehavior.magnitude = 0.0
+        motionManager.stopAccelerometerUpdates()
     }
 }
 
