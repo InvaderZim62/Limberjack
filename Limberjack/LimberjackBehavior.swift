@@ -26,7 +26,7 @@ class LimberjackBehavior: UIDynamicBehavior {
     
     lazy var gravityBehavior: UIGravityBehavior = {
         let behavior = UIGravityBehavior()
-        behavior.magnitude = 0
+        behavior.magnitude = 1.0
         return behavior
     }()
     
