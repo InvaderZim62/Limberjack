@@ -61,15 +61,8 @@ class LimberjackViewController: UIViewController {
             limberjackBehavior.gravityBehavior.magnitude = 1.0
             motionManager.accelerometerUpdateInterval = 0.1
             motionManager.startAccelerometerUpdates(to: .main) { (data, error) in
-                if var x = data?.acceleration.x, var y = data?.acceleration.y {
-                    switch UIDevice.current.orientation {
-                    case .portrait: y *= -1
-                    case .portraitUpsideDown: break
-                    case .landscapeRight: swap(&x, &y)
-                    case .landscapeLeft: swap(&x, &y); y *= -1
-                    default: x = 0; y = 0;
-                    }
-                    self.limberjackBehavior.gravityBehavior.gravityDirection = CGVector(dx: x, dy: y)
+                if let x = data?.acceleration.x, let y = data?.acceleration.y {
+                    self.limberjackBehavior.gravityBehavior.gravityDirection = CGVector(dx: x, dy: -y)
                 }
             }
         }
