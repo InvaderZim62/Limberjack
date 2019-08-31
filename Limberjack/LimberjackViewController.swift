@@ -10,7 +10,7 @@ import UIKit
 import CoreMotion
 
 struct Constants {
-    static let attachmentPoint = CGPoint(x: 200, y: 250)  // relative to animator's reference view
+    static let attachmentPoint = CGPoint(x: 200, y: 200)  // relative to animator's reference view
     static let viewWidth = CGFloat(4)
     static let viewHeight = CGFloat(150)
 }
@@ -22,7 +22,9 @@ class LimberjackViewController: UIViewController {
                                        width: Constants.viewWidth,
                                        height: Constants.viewHeight))
     
-    let blockView = UIView(frame: CGRect(x: 50, y: 320, width: 20, height: 20))
+    let blockView = UIView(frame: CGRect(x: 50, y: 270, width: 20, height: 20))
+
+    let motionManager = CMMotionManager()  // needed to access accelerometers
     
     lazy var animator = UIDynamicAnimator(referenceView: view)
     
@@ -37,7 +39,14 @@ class LimberjackViewController: UIViewController {
         let behavior = UIDynamicItemBehavior()
         behavior.allowsRotation = true
         behavior.elasticity = 0.7
-        behavior.resistance = 0
+        behavior.resistance = 0.5
+        animator.addBehavior(behavior)
+        return behavior
+    }()
+    
+    lazy var gravityBehavior: UIGravityBehavior = {
+        let behavior = UIGravityBehavior()
+        behavior.magnitude = 1.0
         animator.addBehavior(behavior)
         return behavior
     }()
@@ -51,9 +60,10 @@ class LimberjackViewController: UIViewController {
         barView.backgroundColor = .red
         view.addSubview(barView)
         
-        collisionBehavior.addItem(barView)
         collisionBehavior.addItem(blockView)
+        collisionBehavior.addItem(barView)
         itemBehavior.addItem(barView)
+        gravityBehavior.addItem(barView)
 
         let attachment = UIAttachmentBehavior(item: barView,
                                               offsetFromCenter: UIOffset(horizontal: 0, vertical: -Constants.viewHeight / 2),
@@ -67,6 +77,23 @@ class LimberjackViewController: UIViewController {
             push.dynamicAnimator?.removeBehavior(push)
         }
         animator.addBehavior(push)
+
+        // use accelerometers to determine direction of gravity
+        if motionManager.isAccelerometerAvailable {
+            motionManager.accelerometerUpdateInterval = 0.1
+            motionManager.startAccelerometerUpdates(to: .main) { (data, error) in
+                if var x = data?.acceleration.x, var y = data?.acceleration.y {
+                    switch UIDevice.current.orientation {
+                    case .portrait: y *= -1
+                    case .portraitUpsideDown: break
+                    case .landscapeRight: swap(&x, &y)
+                    case .landscapeLeft: swap(&x, &y); y *= -1
+                    default: x = 0; y = 0;
+                    }
+                    self.gravityBehavior.gravityDirection = CGVector(dx: x, dy: y)
+                }
+            }
+        }
     }
 }
 
