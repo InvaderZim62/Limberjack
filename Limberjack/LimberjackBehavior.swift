@@ -12,7 +12,7 @@ class LimberjackBehavior: UIDynamicBehavior {
     
     lazy var collisionBehavior: UICollisionBehavior = {
         let behavior = UICollisionBehavior()
-        behavior.translatesReferenceBoundsIntoBoundary = true
+        behavior.translatesReferenceBoundsIntoBoundary = true  // bounce off edges of screen
         return behavior
     }()
     
@@ -31,20 +31,20 @@ class LimberjackBehavior: UIDynamicBehavior {
     }()
     
     func addItem(_ item: UIDynamicItem) {
-        collisionBehavior.addItem(item)
+//        collisionBehavior.addItem(item)
         itemBehavior.addItem(item)
         gravityBehavior.addItem(item)
     }
     
     func removeItem(_ item: UIDynamicItem) {
-        collisionBehavior.removeItem(item)
+//        collisionBehavior.removeItem(item)
         itemBehavior.removeItem(item)
         gravityBehavior.removeItem(item)
     }
 
     override init() {
         super.init()
-        addChildBehavior(collisionBehavior)
+//        addChildBehavior(collisionBehavior)
         addChildBehavior(itemBehavior)
         addChildBehavior(gravityBehavior)
     }

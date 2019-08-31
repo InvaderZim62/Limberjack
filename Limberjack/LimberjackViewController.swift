@@ -10,52 +10,74 @@ import UIKit
 import CoreMotion
 
 struct Constants {
-    static let attachmentPoint = CGPoint(x: 190, y: 200)  // relative to animator's reference view
-    static let viewWidth = CGFloat(4)
-    static let viewHeight = CGFloat(150)
+    static let handPoint = CGPoint(x: 190, y: 250)  // in animator's reference view coordinates
+    static let lineWidth = CGFloat(3)
+    static let armLength = CGFloat(60)
+    static let torsoLength = CGFloat(60)
+    static let legLength = CGFloat(100)
 }
 
 class LimberjackViewController: UIViewController {
     
-    let bar1View = UIView(frame: CGRect(x: Constants.attachmentPoint.x - Constants.viewWidth / 2,
-                                        y: Constants.attachmentPoint.y,
-                                        width: Constants.viewWidth,
-                                        height: Constants.viewHeight))
-    let bar2View = UIView(frame: CGRect(x: 0, y: 0,width: Constants.viewWidth, height: Constants.viewHeight))
+    let armView = UIView(frame: CGRect(x: Constants.handPoint.x - Constants.lineWidth / 2,
+                                       y: Constants.handPoint.y,
+                                       width: Constants.lineWidth,
+                                       height: Constants.armLength))
+    let torsoView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.torsoLength))
+    let legView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.legLength))
 
     let motionManager = CMMotionManager()  // needed to access accelerometers
     
     lazy var animator = UIDynamicAnimator(referenceView: view)
     
     lazy var limberjackBehavior = LimberjackBehavior(in: animator)
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        bar1View.backgroundColor = .red
-        view.addSubview(bar1View)
-        limberjackBehavior.addItem(bar1View)
-
-        let attachment1 = UIAttachmentBehavior(item: bar1View,
-                                              offsetFromCenter: UIOffset(horizontal: 0, vertical: -Constants.viewHeight / 2),
-                                              attachedToAnchor: Constants.attachmentPoint)
-        animator.addBehavior(attachment1)
+        armView.backgroundColor = .blue
+        view.addSubview(armView)
+        limberjackBehavior.addItem(armView)
         
-        bar2View.backgroundColor = .red
-        bar2View.center = CGPoint(x: bar1View.center.x, y: bar1View.center.y + bar2View.frame.height)
-        view.addSubview(bar2View)
-        limberjackBehavior.addItem(bar2View)
-
-        let attachment2 = UIAttachmentBehavior(item: bar2View,
-                                               offsetFromCenter: UIOffset(horizontal: 0, vertical: -Constants.viewHeight / 2),
-                                               attachedTo: bar1View,
-                                               offsetFromCenter: UIOffset(horizontal: 0, vertical: Constants.viewHeight / 2))
-        animator.addBehavior(attachment2)
+        let handArmAttachment = UIAttachmentBehavior(
+            item: armView,
+            offsetFromCenter: UIOffset(horizontal: 0, vertical: -Constants.armLength / 2),
+            attachedToAnchor: Constants.handPoint
+        )
+        animator.addBehavior(handArmAttachment)
+        
+        torsoView.backgroundColor = .blue
+        torsoView.center = CGPoint(x: armView.center.x,
+                                   y: armView.center.y + (armView.frame.height + torsoView.frame.height) / 2)
+        view.addSubview(torsoView)
+        limberjackBehavior.addItem(torsoView)
+        
+        let armTorsoAttachment = UIAttachmentBehavior(
+            item: armView,
+            offsetFromCenter: UIOffset(horizontal: 0, vertical: Constants.armLength / 2),
+            attachedTo: torsoView,
+            offsetFromCenter: UIOffset(horizontal: 0, vertical: -Constants.torsoLength / 2)
+        )
+        animator.addBehavior(armTorsoAttachment)
+        
+        legView.backgroundColor = .blue
+        legView.center = CGPoint(x: torsoView.center.x,
+                                 y: torsoView.center.y + (torsoView.frame.height + legView.frame.height) / 2)
+        view.addSubview(legView)
+        limberjackBehavior.addItem(legView)
+        
+        let torsoLegAttachment = UIAttachmentBehavior(
+            item: torsoView,
+            offsetFromCenter: UIOffset(horizontal: 0, vertical: Constants.torsoLength / 2),
+            attachedTo: legView,
+            offsetFromCenter: UIOffset(horizontal: 0, vertical: -Constants.legLength / 2)
+        )
+        animator.addBehavior(torsoLegAttachment)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
+        
         // use accelerometers to determine direction of gravity
         if motionManager.isAccelerometerAvailable {
             limberjackBehavior.gravityBehavior.magnitude = 1.0
