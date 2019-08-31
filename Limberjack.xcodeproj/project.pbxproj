@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4A15E539231AF6BF002E68CA /* HeadAndTorsoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A15E538231AF6BF002E68CA /* HeadAndTorsoView.swift */; };
 		4A3F214C23189D4F00DC4B07 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3F214B23189D4F00DC4B07 /* AppDelegate.swift */; };
 		4A3F214E23189D4F00DC4B07 /* LimberjackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3F214D23189D4F00DC4B07 /* LimberjackViewController.swift */; };
 		4A3F215123189D4F00DC4B07 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A3F214F23189D4F00DC4B07 /* Main.storyboard */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4A15E538231AF6BF002E68CA /* HeadAndTorsoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeadAndTorsoView.swift; sourceTree = "<group>"; };
 		4A3F214823189D4F00DC4B07 /* Limberjack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Limberjack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A3F214B23189D4F00DC4B07 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4A3F214D23189D4F00DC4B07 /* LimberjackViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimberjackViewController.swift; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 				4A3F214F23189D4F00DC4B07 /* Main.storyboard */,
 				4A3F214D23189D4F00DC4B07 /* LimberjackViewController.swift */,
 				4A3F2163231A2C6900DC4B07 /* LimberjackBehavior.swift */,
+				4A15E538231AF6BF002E68CA /* HeadAndTorsoView.swift */,
 				4A3F215D23189DA700DC4B07 /* Supporting Files */,
 			);
 			path = Limberjack;
@@ -146,6 +149,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A15E539231AF6BF002E68CA /* HeadAndTorsoView.swift in Sources */,
 				4A3F214E23189D4F00DC4B07 /* LimberjackViewController.swift in Sources */,
 				4A3F2164231A2C6900DC4B07 /* LimberjackBehavior.swift in Sources */,
 				4A3F214C23189D4F00DC4B07 /* AppDelegate.swift in Sources */,
