@@ -62,9 +62,8 @@
 			children = (
 				4A3F214F23189D4F00DC4B07 /* Main.storyboard */,
 				4A3F214D23189D4F00DC4B07 /* LimberjackViewController.swift */,
-				4A3F2163231A2C6900DC4B07 /* LimberjackBehavior.swift */,
-				4AAFAD4E231CBD940026D47A /* BarView.swift */,
-				4A15E538231AF6BF002E68CA /* HeadAndTorsoView.swift */,
+				4AAFAD50231CF0ED0026D47A /* Views */,
+				4AAFAD51231CF11A0026D47A /* Utilities */,
 				4A3F215D23189DA700DC4B07 /* Supporting Files */,
 			);
 			path = Limberjack;
@@ -79,6 +78,23 @@
 				4A3F215723189D5900DC4B07 /* Info.plist */,
 			);
 			path = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4AAFAD50231CF0ED0026D47A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				4AAFAD4E231CBD940026D47A /* BarView.swift */,
+				4A15E538231AF6BF002E68CA /* HeadAndTorsoView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		4AAFAD51231CF11A0026D47A /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				4A3F2163231A2C6900DC4B07 /* LimberjackBehavior.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

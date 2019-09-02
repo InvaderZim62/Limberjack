@@ -52,6 +52,8 @@ class LimberjackViewController: UIViewController {
     lazy var animator = UIDynamicAnimator(referenceView: view)
     lazy var limberjackBehavior = LimberjackBehavior(in: animator)
     
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -104,19 +106,8 @@ class LimberjackViewController: UIViewController {
         super.viewWillDisappear(animated)
         motionManager.stopAccelerometerUpdates()
     }
-    
-    private func createAttachments() {
-        leftHandAttachment = attach(topOf: leftForearmView, to: Constants.barPoint)
-        rightHandAttachment = attach(topOf: rightForearmView, to: Constants.barPoint)
-        attach(topOf: leftBiseptView, offsetBy: 0.0, toBottomOf: leftForearmView, range: elbowRange, friction: 0.0)
-        attach(topOf: rightBiseptView, offsetBy: 0.0, toBottomOf: rightForearmView, range: elbowRange, friction: 0.0)
-        attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: leftBiseptView, range: shoulderRange, friction: 0.0)
-        attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: rightBiseptView, range: shoulderRange, friction: 0.0)
-        attach(topOf: leftThighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
-        attach(topOf: rightThighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
-        attach(topOf: leftShinView, offsetBy: 0.0, toBottomOf: leftThighView, range: kneeRange, friction: 0.04)
-        attach(topOf: rightShinView, offsetBy: 0.0, toBottomOf: rightThighView, range: kneeRange, friction: 0.04)
-    }
+
+    // MARK: - Gestures
 
     @objc private func handleTap(recognizer: UITapGestureRecognizer) {
         // let go of bar
@@ -131,6 +122,21 @@ class LimberjackViewController: UIViewController {
         rightForearmView.backgroundColor = .blue
         rightThighView.backgroundColor = .blue
         rightShinView.backgroundColor = .blue
+    }
+    
+    // MARK: - Helper Functions
+
+    private func createAttachments() {
+        leftHandAttachment = attach(topOf: leftForearmView, to: Constants.barPoint)
+        rightHandAttachment = attach(topOf: rightForearmView, to: Constants.barPoint)
+        attach(topOf: leftBiseptView, offsetBy: 0.0, toBottomOf: leftForearmView, range: elbowRange, friction: 0.0)
+        attach(topOf: rightBiseptView, offsetBy: 0.0, toBottomOf: rightForearmView, range: elbowRange, friction: 0.0)
+        attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: leftBiseptView, range: shoulderRange, friction: 0.0)
+        attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: rightBiseptView, range: shoulderRange, friction: 0.0)
+        attach(topOf: leftThighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
+        attach(topOf: rightThighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
+        attach(topOf: leftShinView, offsetBy: 0.0, toBottomOf: leftThighView, range: kneeRange, friction: 0.04)
+        attach(topOf: rightShinView, offsetBy: 0.0, toBottomOf: rightThighView, range: kneeRange, friction: 0.04)
     }
 
     private func attach(topOf view1: UIView, to point: CGPoint) -> UIAttachmentBehavior {
