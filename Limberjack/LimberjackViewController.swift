@@ -15,8 +15,9 @@ struct Constants {
     static let lineWidth = CGFloat(3)
     static let headRadius = CGFloat(8)
     static let neckLength = CGFloat(12)
-    static let biseptLength = CGFloat(30)
+    static let handLength = CGFloat(8)
     static let forearmLength = CGFloat(30)
+    static let biseptLength = CGFloat(30)
     static let torsoLength = CGFloat(80)
     static let thighLength = CGFloat(45)
     static let shinLength = CGFloat(45)
@@ -24,12 +25,14 @@ struct Constants {
 
 class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     
+    var falling = false
     var freeOfBar = false
     
     var leftHandAttachment: UIAttachmentBehavior!
     var rightHandAttachment: UIAttachmentBehavior!
 
     let headAndNeckLength = Constants.headRadius * 2 + Constants.neckLength
+    let wristRange = UIFloatRange(minimum: -1.0, maximum: 1.0)
     let elbowRange = UIFloatRange(minimum: 0.0, maximum: 2.0)
     let shoulderRange = UIFloatRange(minimum: -CGFloat.pi, maximum: CGFloat.pi)
     let hipRange = UIFloatRange(minimum: -2.8, maximum: 1.0)  // radians, positive bends backwards
@@ -41,10 +44,12 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     let torsoView = HeadAndTorsoView(frame: CGRect(x: 0, y: 0,
                                                    width: (Constants.headRadius + Constants.lineWidth) * 2,
                                                    height: Constants.torsoLength))
-    let leftBiseptView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.biseptLength))
-    let rightBiseptView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.biseptLength))
+    let leftHandView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.handLength))
+    let rightHandView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.handLength))
     let leftForearmView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.forearmLength))
     let rightForearmView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.forearmLength))
+    let leftBiseptView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.biseptLength))
+    let rightBiseptView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.biseptLength))
     let leftThighView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.thighLength))
     let rightThighView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.thighLength))
     let leftShinView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.shinLength))
@@ -99,16 +104,24 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
         // let go of bar
         animator.removeBehavior(leftHandAttachment)
         animator.removeBehavior(rightHandAttachment)
-        
+        falling = true
+
         // once falling, make bar region collideable
-        let circle = UIBezierPath(ovalIn: barView.frame)
+        let circle = UIBezierPath(arcCenter: barView.center,
+                                  radius: Constants.barRadius,
+                                  startAngle: 0.0,
+                                  endAngle: 2.0 * CGFloat.pi,
+                                  clockwise: true)
+//        let circle = UIBezierPath(ovalIn: barView.frame)
         limberjackBehavior.collisionBehavior.addBoundary(withIdentifier: NSString("bar"), for: circle)
 
         // make all limbs visible
-        leftBiseptView.backgroundColor = .blue
+        leftHandView.backgroundColor = .blue
         leftForearmView.backgroundColor = .blue
-        rightBiseptView.backgroundColor = .blue
+        leftBiseptView.backgroundColor = .blue
+        rightHandView.backgroundColor = .blue
         rightForearmView.backgroundColor = .blue
+        rightBiseptView.backgroundColor = .blue
         rightThighView.backgroundColor = .blue
         rightShinView.backgroundColor = .blue
     }
@@ -116,10 +129,12 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     // MARK: - Helper Functions
 
     private func addSubviews() {
-        view.addSubview(leftBiseptView)
-        view.addSubview(rightBiseptView)
+        view.addSubview(leftHandView)
+        view.addSubview(rightHandView)
         view.addSubview(leftForearmView)
         view.addSubview(rightForearmView)
+        view.addSubview(leftBiseptView)
+        view.addSubview(rightBiseptView)
         view.addSubview(torsoView)
         view.addSubview(leftThighView)
         view.addSubview(rightThighView)
@@ -128,10 +143,12 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     }
     
     private func setBackgroundColors() {
-        leftBiseptView.backgroundColor = .blue
-        rightBiseptView.backgroundColor = .clear  // hide right limbs, until falling
+        leftHandView.backgroundColor = .blue
+        rightHandView.backgroundColor = .clear  // hide right limbs, until falling
         leftForearmView.backgroundColor = .blue
         rightForearmView.backgroundColor = .clear
+        leftBiseptView.backgroundColor = .blue
+        rightBiseptView.backgroundColor = .clear
         torsoView.backgroundColor = .clear
         leftThighView.backgroundColor = .blue
         rightThighView.backgroundColor = .clear
@@ -140,8 +157,10 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     }
     
     private func createAttachments() {
-        leftHandAttachment = attach(topOf: leftForearmView, to: Constants.barPoint)
-        rightHandAttachment = attach(topOf: rightForearmView, to: Constants.barPoint)
+        leftHandAttachment = attach(topOf: leftHandView, to: Constants.barPoint)
+        rightHandAttachment = attach(topOf: rightHandView, to: Constants.barPoint)
+        attach(topOf: leftForearmView, offsetBy: 0.0, toBottomOf: leftHandView, range: wristRange, friction: 0.0)
+        attach(topOf: rightForearmView, offsetBy: 0.0, toBottomOf: rightHandView, range: wristRange, friction: 0.0)
         attach(topOf: leftBiseptView, offsetBy: 0.0, toBottomOf: leftForearmView, range: elbowRange, friction: 0.0)
         attach(topOf: rightBiseptView, offsetBy: 0.0, toBottomOf: rightForearmView, range: elbowRange, friction: 0.0)
         attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: leftBiseptView, range: shoulderRange, friction: 0.0)
@@ -186,23 +205,27 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     // MARK: - UICollisionBehaviorDelegate
     
     func collisionBehavior(_ behavior: UICollisionBehavior, endedContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?) {
-        freeOfBar = true
+        if falling { freeOfBar = true }
     }
     
     func collisionBehavior(_ behavior: UICollisionBehavior, beganContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?, at p: CGPoint) {
         if freeOfBar {
             if let id = identifier as? NSString, id == "bar" {
                 if let contactor = item as? UIView {
-                    if contactor == leftForearmView {
+                    if contactor == leftHandView {
+                        falling = false
                         freeOfBar = false
                         animator.addBehavior(leftHandAttachment)
+                        rightHandView.backgroundColor = .clear
                         rightForearmView.backgroundColor = .clear
                         rightBiseptView.backgroundColor = .clear
                         rightThighView.backgroundColor = .clear
                         rightShinView.backgroundColor = .clear
-                    } else if contactor == rightForearmView {
+                    } else if contactor == rightHandView {
+                        falling = false
                         freeOfBar = false
                         animator.addBehavior(rightHandAttachment)
+                        leftHandView.backgroundColor = .clear
                         leftForearmView.backgroundColor = .clear
                         leftBiseptView.backgroundColor = .clear
                         rightThighView.backgroundColor = .clear
