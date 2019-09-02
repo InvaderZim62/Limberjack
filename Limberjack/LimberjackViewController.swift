@@ -22,7 +22,9 @@ struct Constants {
     static let shinLength = CGFloat(45)
 }
 
-class LimberjackViewController: UIViewController {
+class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
+    
+    var freeOfBar = false
     
     var leftHandAttachment: UIAttachmentBehavior!
     var rightHandAttachment: UIAttachmentBehavior!
@@ -65,27 +67,11 @@ class LimberjackViewController: UIViewController {
         barView.backgroundColor = .clear
         view.addSubview(barView)
         
-        view.addSubview(leftBiseptView)
-        view.addSubview(rightBiseptView)
-        view.addSubview(leftForearmView)
-        view.addSubview(rightForearmView)
-        view.addSubview(torsoView)
-        view.addSubview(leftThighView)
-        view.addSubview(rightThighView)
-        view.addSubview(leftShinView)
-        view.addSubview(rightShinView)
-
-        leftBiseptView.backgroundColor = .blue
-        rightBiseptView.backgroundColor = .clear  // hide right limbs, until falling
-        leftForearmView.backgroundColor = .blue
-        rightForearmView.backgroundColor = .clear
-        torsoView.backgroundColor = .clear
-        leftThighView.backgroundColor = .blue
-        rightThighView.backgroundColor = .clear
-        leftShinView.backgroundColor = .blue
-        rightShinView.backgroundColor = .clear
-        
+        addSubviews()
+        setBackgroundColors()
         createAttachments()
+        
+        limberjackBehavior.collisionBehavior.collisionDelegate = self
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -118,7 +104,10 @@ class LimberjackViewController: UIViewController {
         let circle = UIBezierPath(ovalIn: barView.frame)
         limberjackBehavior.collisionBehavior.addBoundary(withIdentifier: NSString("bar"), for: circle)
 
-        rightBiseptView.backgroundColor = .blue  // show right limbs when falling
+        // make all limbs visible
+        leftBiseptView.backgroundColor = .blue
+        leftForearmView.backgroundColor = .blue
+        rightBiseptView.backgroundColor = .blue
         rightForearmView.backgroundColor = .blue
         rightThighView.backgroundColor = .blue
         rightShinView.backgroundColor = .blue
@@ -126,6 +115,30 @@ class LimberjackViewController: UIViewController {
     
     // MARK: - Helper Functions
 
+    private func addSubviews() {
+        view.addSubview(leftBiseptView)
+        view.addSubview(rightBiseptView)
+        view.addSubview(leftForearmView)
+        view.addSubview(rightForearmView)
+        view.addSubview(torsoView)
+        view.addSubview(leftThighView)
+        view.addSubview(rightThighView)
+        view.addSubview(leftShinView)
+        view.addSubview(rightShinView)
+    }
+    
+    private func setBackgroundColors() {
+        leftBiseptView.backgroundColor = .blue
+        rightBiseptView.backgroundColor = .clear  // hide right limbs, until falling
+        leftForearmView.backgroundColor = .blue
+        rightForearmView.backgroundColor = .clear
+        torsoView.backgroundColor = .clear
+        leftThighView.backgroundColor = .blue
+        rightThighView.backgroundColor = .clear
+        leftShinView.backgroundColor = .blue
+        rightShinView.backgroundColor = .clear
+    }
+    
     private func createAttachments() {
         leftHandAttachment = attach(topOf: leftForearmView, to: Constants.barPoint)
         rightHandAttachment = attach(topOf: rightForearmView, to: Constants.barPoint)
@@ -168,6 +181,36 @@ class LimberjackViewController: UIViewController {
         attachment.frictionTorque = friction
         attachment.attachmentRange = range
         animator.addBehavior(attachment)
+    }
+
+    // MARK: - UICollisionBehaviorDelegate
+    
+    func collisionBehavior(_ behavior: UICollisionBehavior, endedContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?) {
+        freeOfBar = true
+    }
+    
+    func collisionBehavior(_ behavior: UICollisionBehavior, beganContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?, at p: CGPoint) {
+        if freeOfBar {
+            if let id = identifier as? NSString, id == "bar" {
+                if let contactor = item as? UIView {
+                    if contactor == leftForearmView {
+                        freeOfBar = false
+                        animator.addBehavior(leftHandAttachment)
+                        rightForearmView.backgroundColor = .clear
+                        rightBiseptView.backgroundColor = .clear
+                        rightThighView.backgroundColor = .clear
+                        rightShinView.backgroundColor = .clear
+                    } else if contactor == rightForearmView {
+                        freeOfBar = false
+                        animator.addBehavior(rightHandAttachment)
+                        leftForearmView.backgroundColor = .clear
+                        leftBiseptView.backgroundColor = .clear
+                        rightThighView.backgroundColor = .clear
+                        rightShinView.backgroundColor = .clear
+                    }
+                }
+            }
+        }
     }
 }
 
