@@ -22,6 +22,8 @@ struct Constants {
 
 class LimberjackViewController: UIViewController {
     
+    var handAttachment: UIAttachmentBehavior!
+    
     let armView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.armLength))
     let torsoView = HeadAndTorsoView(frame: CGRect(x: 0, y: 0,
                                                    width: (Constants.headRadius + Constants.lineWidth) * 2,
@@ -36,6 +38,10 @@ class LimberjackViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        tap.numberOfTapsRequired = 1
+        view.addGestureRecognizer(tap)
+
         armView.backgroundColor = .blue
         torsoView.backgroundColor = .clear
         thighView.backgroundColor = .blue
@@ -47,7 +53,7 @@ class LimberjackViewController: UIViewController {
         let hipRange = UIFloatRange(minimum: -2.8, maximum: 1.0)
         let kneeRange = UIFloatRange(minimum: 0.0, maximum: 2.0)
 
-        attach(topOf: armView, to: Constants.handPoint)
+        handAttachment = attach(topOf: armView, to: Constants.handPoint)
         attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: armView, range: shoulderRange, friction: 0.0)
         attach(topOf: thighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
         attach(topOf: shinView, offsetBy: 0.0, toBottomOf: thighView, range: kneeRange, friction: 0.04)
@@ -71,8 +77,12 @@ class LimberjackViewController: UIViewController {
         super.viewWillDisappear(animated)
         motionManager.stopAccelerometerUpdates()
     }
+    
+    @objc private func handleTap(recognizer: UITapGestureRecognizer) {
+        animator.removeBehavior(handAttachment)
+    }
 
-    private func attach(topOf view1: UIView, to point: CGPoint) {
+    private func attach(topOf view1: UIView, to point: CGPoint) -> UIAttachmentBehavior {
         view1.center = CGPoint(x: point.x,
                                y: point.y + view1.frame.height / 2)
         view.addSubview(view1)
@@ -84,6 +94,8 @@ class LimberjackViewController: UIViewController {
             attachedToAnchor: point
         )
         animator.addBehavior(attachment)
+        
+        return attachment
     }
     
     private func attach(topOf view1: UIView,
