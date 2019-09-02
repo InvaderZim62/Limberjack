@@ -74,17 +74,8 @@ class LimberjackViewController: UIViewController {
         rightThighView.backgroundColor = .clear
         leftShinView.backgroundColor = .blue
         rightShinView.backgroundColor = .clear
-
-        leftHandAttachment = attach(topOf: leftForearmView, to: Constants.handPoint)
-        rightHandAttachment = attach(topOf: rightForearmView, to: Constants.handPoint)
-        attach(topOf: leftBiseptView, offsetBy: 0.0, toBottomOf: leftForearmView, range: elbowRange, friction: 0.0)
-        attach(topOf: rightBiseptView, offsetBy: 0.0, toBottomOf: rightForearmView, range: elbowRange, friction: 0.0)
-        attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: leftBiseptView, range: shoulderRange, friction: 0.0)
-        attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: rightBiseptView, range: shoulderRange, friction: 0.0)
-        attach(topOf: leftThighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
-        attach(topOf: rightThighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
-        attach(topOf: leftShinView, offsetBy: 0.0, toBottomOf: leftThighView, range: kneeRange, friction: 0.04)
-        attach(topOf: rightShinView, offsetBy: 0.0, toBottomOf: rightThighView, range: kneeRange, friction: 0.04)
+        
+        createAttachments()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -106,6 +97,19 @@ class LimberjackViewController: UIViewController {
         motionManager.stopAccelerometerUpdates()
     }
     
+    private func createAttachments() {
+        leftHandAttachment = attach(topOf: leftForearmView, to: Constants.handPoint)
+        rightHandAttachment = attach(topOf: rightForearmView, to: Constants.handPoint)
+        attach(topOf: leftBiseptView, offsetBy: 0.0, toBottomOf: leftForearmView, range: elbowRange, friction: 0.0)
+        attach(topOf: rightBiseptView, offsetBy: 0.0, toBottomOf: rightForearmView, range: elbowRange, friction: 0.0)
+        attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: leftBiseptView, range: shoulderRange, friction: 0.0)
+        attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: rightBiseptView, range: shoulderRange, friction: 0.0)
+        attach(topOf: leftThighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
+        attach(topOf: rightThighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
+        attach(topOf: leftShinView, offsetBy: 0.0, toBottomOf: leftThighView, range: kneeRange, friction: 0.04)
+        attach(topOf: rightShinView, offsetBy: 0.0, toBottomOf: rightThighView, range: kneeRange, friction: 0.04)
+    }
+
     @objc private func handleTap(recognizer: UITapGestureRecognizer) {
         animator.removeBehavior(leftHandAttachment)
         animator.removeBehavior(rightHandAttachment)
