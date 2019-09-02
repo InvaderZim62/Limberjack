@@ -14,6 +14,7 @@
 		4A3F215323189D5900DC4B07 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4A3F215223189D5900DC4B07 /* Assets.xcassets */; };
 		4A3F215623189D5900DC4B07 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A3F215423189D5900DC4B07 /* LaunchScreen.storyboard */; };
 		4A3F2164231A2C6900DC4B07 /* LimberjackBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A3F2163231A2C6900DC4B07 /* LimberjackBehavior.swift */; };
+		4AAFAD4F231CBD940026D47A /* BarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AAFAD4E231CBD940026D47A /* BarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		4A3F215523189D5900DC4B07 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4A3F215723189D5900DC4B07 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4A3F2163231A2C6900DC4B07 /* LimberjackBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LimberjackBehavior.swift; sourceTree = "<group>"; };
+		4AAFAD4E231CBD940026D47A /* BarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +63,7 @@
 				4A3F214F23189D4F00DC4B07 /* Main.storyboard */,
 				4A3F214D23189D4F00DC4B07 /* LimberjackViewController.swift */,
 				4A3F2163231A2C6900DC4B07 /* LimberjackBehavior.swift */,
+				4AAFAD4E231CBD940026D47A /* BarView.swift */,
 				4A15E538231AF6BF002E68CA /* HeadAndTorsoView.swift */,
 				4A3F215D23189DA700DC4B07 /* Supporting Files */,
 			);
@@ -153,6 +156,7 @@
 				4A3F214E23189D4F00DC4B07 /* LimberjackViewController.swift in Sources */,
 				4A3F2164231A2C6900DC4B07 /* LimberjackBehavior.swift in Sources */,
 				4A3F214C23189D4F00DC4B07 /* AppDelegate.swift in Sources */,
+				4AAFAD4F231CBD940026D47A /* BarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

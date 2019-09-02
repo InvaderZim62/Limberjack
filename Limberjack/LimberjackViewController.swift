@@ -10,7 +10,8 @@ import UIKit
 import CoreMotion
 
 struct Constants {
-    static let handPoint = CGPoint(x: 190, y: 250)  // in animator's reference view coordinates
+    static let barPoint = CGPoint(x: 190, y: 250)  // in animator's reference view coordinates
+    static let barRadius = CGFloat(4)
     static let lineWidth = CGFloat(3)
     static let headRadius = CGFloat(8)
     static let neckLength = CGFloat(12)
@@ -27,11 +28,17 @@ class LimberjackViewController: UIViewController {
     var rightHandAttachment: UIAttachmentBehavior!
 
     let headAndNeckLength = Constants.headRadius * 2 + Constants.neckLength
-    let elbowRange = UIFloatRange(minimum: 0.0, maximum: 2.0)  // radians, positive bends backwards
+    let elbowRange = UIFloatRange(minimum: 0.0, maximum: 2.0)
     let shoulderRange = UIFloatRange(minimum: -CGFloat.pi, maximum: CGFloat.pi)
-    let hipRange = UIFloatRange(minimum: -2.8, maximum: 1.0)
+    let hipRange = UIFloatRange(minimum: -2.8, maximum: 1.0)  // radians, positive bends backwards
     let kneeRange = UIFloatRange(minimum: 0.0, maximum: 2.0)
 
+    let barView = BarView(frame: CGRect(x: 0, y: 0,
+                                        width: (Constants.barRadius + Constants.lineWidth) * 2,
+                                        height: (Constants.barRadius + Constants.lineWidth) * 2))
+    let torsoView = HeadAndTorsoView(frame: CGRect(x: 0, y: 0,
+                                                   width: (Constants.headRadius + Constants.lineWidth) * 2,
+                                                   height: Constants.torsoLength))
     let leftBiseptView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.biseptLength))
     let rightBiseptView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.biseptLength))
     let leftForearmView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.forearmLength))
@@ -40,9 +47,6 @@ class LimberjackViewController: UIViewController {
     let rightThighView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.thighLength))
     let leftShinView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.shinLength))
     let rightShinView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.shinLength))
-    let torsoView = HeadAndTorsoView(frame: CGRect(x: 0, y: 0,
-                                                   width: (Constants.headRadius + Constants.lineWidth) * 2,
-                                                   height: Constants.torsoLength))
 
     let motionManager = CMMotionManager()  // needed for accelerometers
     lazy var animator = UIDynamicAnimator(referenceView: view)
@@ -55,6 +59,10 @@ class LimberjackViewController: UIViewController {
         tap.numberOfTapsRequired = 1
         view.addGestureRecognizer(tap)
         
+        barView.center = Constants.barPoint
+        barView.backgroundColor = .clear
+        view.addSubview(barView)
+        
         view.addSubview(leftBiseptView)
         view.addSubview(rightBiseptView)
         view.addSubview(leftForearmView)
@@ -66,7 +74,7 @@ class LimberjackViewController: UIViewController {
         view.addSubview(rightShinView)
 
         leftBiseptView.backgroundColor = .blue
-        rightBiseptView.backgroundColor = .clear
+        rightBiseptView.backgroundColor = .clear  // hide right limbs, until falling
         leftForearmView.backgroundColor = .blue
         rightForearmView.backgroundColor = .clear
         torsoView.backgroundColor = .clear
@@ -80,7 +88,7 @@ class LimberjackViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+
         // use accelerometers to determine direction of gravity
         if motionManager.isAccelerometerAvailable {
             motionManager.accelerometerUpdateInterval = 0.1
@@ -98,8 +106,8 @@ class LimberjackViewController: UIViewController {
     }
     
     private func createAttachments() {
-        leftHandAttachment = attach(topOf: leftForearmView, to: Constants.handPoint)
-        rightHandAttachment = attach(topOf: rightForearmView, to: Constants.handPoint)
+        leftHandAttachment = attach(topOf: leftForearmView, to: Constants.barPoint)
+        rightHandAttachment = attach(topOf: rightForearmView, to: Constants.barPoint)
         attach(topOf: leftBiseptView, offsetBy: 0.0, toBottomOf: leftForearmView, range: elbowRange, friction: 0.0)
         attach(topOf: rightBiseptView, offsetBy: 0.0, toBottomOf: rightForearmView, range: elbowRange, friction: 0.0)
         attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: leftBiseptView, range: shoulderRange, friction: 0.0)
@@ -111,10 +119,15 @@ class LimberjackViewController: UIViewController {
     }
 
     @objc private func handleTap(recognizer: UITapGestureRecognizer) {
+        // let go of bar
         animator.removeBehavior(leftHandAttachment)
         animator.removeBehavior(rightHandAttachment)
+        
+        // once falling, make bar region collideable
+        let circle = UIBezierPath(ovalIn: barView.frame)
+        limberjackBehavior.collisionBehavior.addBoundary(withIdentifier: NSString("bar"), for: circle)
 
-        rightBiseptView.backgroundColor = .blue
+        rightBiseptView.backgroundColor = .blue  // show right limbs when falling
         rightForearmView.backgroundColor = .blue
         rightThighView.backgroundColor = .blue
         rightShinView.backgroundColor = .blue
@@ -135,19 +148,15 @@ class LimberjackViewController: UIViewController {
         return attachment
     }
     
-    private func attach(topOf view1: UIView,
-                        offsetBy: CGFloat,
-                        toBottomOf view2: UIView,
-                        range: UIFloatRange,
-                        friction: CGFloat) {
+    private func attach(topOf view1: UIView, offsetBy: CGFloat, toBottomOf view2: UIView,
+                        range: UIFloatRange, friction: CGFloat) {
         
         view1.center = CGPoint(x: view2.center.x,
                                y: view2.center.y + (view2.frame.height + view1.frame.height) / 2 - offsetBy)
         limberjackBehavior.addItem(view1)
         
         let attachment = UIAttachmentBehavior.pinAttachment(
-            with: view1,
-            attachedTo: view2,
+            with: view1, attachedTo: view2,
             attachmentAnchor: CGPoint(x: view1.center.x, y: view1.frame.origin.y + offsetBy)
         )
         attachment.frictionTorque = friction
