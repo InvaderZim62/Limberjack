@@ -209,6 +209,15 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     // is finally beyond contact zone around bar
     func collisionBehavior(_ behavior: UICollisionBehavior, endedContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?) {
         if falling { freeOfBar = true }
+        if !view.superview!.bounds.contains(leftForearmView.frame) {
+            print("left forearm out of bounds")
+        } else if !view.superview!.bounds.contains(rightForearmView.frame) {
+            print("right forearm out of bounds")
+        } else if !view.superview!.bounds.contains(leftHandView.frame) {
+            print("left hand out of bounds")
+        } else if !view.superview!.bounds.contains(rightHandView.frame) {
+            print("right hand out of bounds")
+        }
     }
     
     // called when any part of body contacts edges of screen or zone around bar
@@ -217,22 +226,18 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
         if freeOfBar {
             if let id = identifier as? NSString, id == "bar" {
                 if let contactor = item as? UIView {
-                    if contactor == leftHandView {
+                    if contactor == leftHandView || contactor == rightHandView {
                         falling = false
                         freeOfBar = false
+                        limberjackBehavior.collisionBehavior.removeBoundary(withIdentifier: NSString("bar"))
                         animator.addBehavior(leftHandAttachment)
+                        animator.addBehavior(rightHandAttachment)
+                        leftHandAttachment.length = 2
+                        rightHandAttachment.length = 2
+                        limberjackBehavior.collisionBehavior.translatesReferenceBoundsIntoBoundary = false
                         rightHandView.backgroundColor = .clear
                         rightForearmView.backgroundColor = .clear
                         rightBiseptView.backgroundColor = .clear
-                        rightThighView.backgroundColor = .clear
-                        rightShinView.backgroundColor = .clear
-                    } else if contactor == rightHandView {
-                        falling = false
-                        freeOfBar = false
-                        animator.addBehavior(rightHandAttachment)
-                        leftHandView.backgroundColor = .clear
-                        leftForearmView.backgroundColor = .clear
-                        leftBiseptView.backgroundColor = .clear
                         rightThighView.backgroundColor = .clear
                         rightShinView.backgroundColor = .clear
                     }
