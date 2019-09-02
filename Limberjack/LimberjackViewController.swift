@@ -174,12 +174,12 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
 
     private func attach(topOf view1: UIView, to point: CGPoint) -> UIAttachmentBehavior {
         view1.center = CGPoint(x: point.x,
-                               y: point.y + view1.frame.height / 2)
+                               y: point.y + view1.bounds.midY)
         limberjackBehavior.addItem(view1)
         
         let attachment = UIAttachmentBehavior(
             item: view1,
-            offsetFromCenter: UIOffset(horizontal: 0, vertical: -view1.frame.height / 2),
+            offsetFromCenter: UIOffset(horizontal: 0, vertical: -view1.bounds.midY),
             attachedToAnchor: point
         )
         animator.addBehavior(attachment)
@@ -191,7 +191,7 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
                         range: UIFloatRange, friction: CGFloat) {
         
         view1.center = CGPoint(x: view2.center.x,
-                               y: view2.center.y + (view2.frame.height + view1.frame.height) / 2 - offsetBy)
+                               y: view2.center.y + view2.bounds.midY + view1.bounds.midY - offsetBy)
         limberjackBehavior.addItem(view1)
         
         let attachment = UIAttachmentBehavior.pinAttachment(
@@ -211,7 +211,7 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
         if falling { freeOfBar = true }
     }
     
-    // called when any part of body contacts zone around bar
+    // called when any part of body contacts edges of screen or zone around bar
     // note: this is called several times when body begins to fall away from bar
     func collisionBehavior(_ behavior: UICollisionBehavior, beganContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?, at p: CGPoint) {
         if freeOfBar {
