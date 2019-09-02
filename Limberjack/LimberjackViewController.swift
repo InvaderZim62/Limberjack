@@ -16,7 +16,8 @@ struct Constants {
     static let neckLength = CGFloat(10)
     static let armLength = CGFloat(60)
     static let torsoLength = CGFloat(80)
-    static let legLength = CGFloat(90)
+    static let thighLength = CGFloat(45)
+    static let shinLength = CGFloat(45)
 }
 
 class LimberjackViewController: UIViewController {
@@ -25,7 +26,8 @@ class LimberjackViewController: UIViewController {
     let torsoView = HeadAndTorsoView(frame: CGRect(x: 0, y: 0,
                                                    width: (Constants.headRadius + Constants.lineWidth) * 2,
                                                    height: Constants.torsoLength))
-    let legView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.legLength))
+    let thighView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.thighLength))
+    let shinView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.shinLength))
 
     let motionManager = CMMotionManager()  // needed for accelerometers
     lazy var animator = UIDynamicAnimator(referenceView: view)
@@ -36,11 +38,19 @@ class LimberjackViewController: UIViewController {
         
         armView.backgroundColor = .blue
         torsoView.backgroundColor = .clear
-        legView.backgroundColor = .blue
+        thighView.backgroundColor = .blue
+        shinView.backgroundColor = .blue
         
+        let headAndNeckLength = Constants.headRadius * 2 + Constants.neckLength
+
+        let shoulderRange = UIFloatRange(minimum: -CGFloat.pi, maximum: CGFloat.pi)  // radians, pos bends backwards
+        let hipRange = UIFloatRange(minimum: -2.8, maximum: 1.0)
+        let kneeRange = UIFloatRange(minimum: 0.0, maximum: 2.0)
+
         attach(topOf: armView, to: Constants.handPoint)
-        attach(topOf: torsoView, offsetBy: Constants.headRadius * 2 + Constants.neckLength, toBottomOf: armView)
-        attach(topOf: legView, offsetBy: 0, toBottomOf: torsoView)
+        attach(topOf: torsoView, offsetBy: headAndNeckLength, toBottomOf: armView, range: shoulderRange, friction: 0.0)
+        attach(topOf: thighView, offsetBy: 0.0, toBottomOf: torsoView, range: hipRange, friction: 0.02)
+        attach(topOf: shinView, offsetBy: 0.0, toBottomOf: thighView, range: kneeRange, friction: 0.04)
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -76,18 +86,24 @@ class LimberjackViewController: UIViewController {
         animator.addBehavior(attachment)
     }
     
-    private func attach(topOf view1: UIView, offsetBy: CGFloat, toBottomOf view2: UIView) {
+    private func attach(topOf view1: UIView,
+                        offsetBy: CGFloat,
+                        toBottomOf view2: UIView,
+                        range: UIFloatRange,
+                        friction: CGFloat) {
+        
         view1.center = CGPoint(x: view2.center.x,
                                y: view2.center.y + (view2.frame.height + view1.frame.height) / 2 - offsetBy)
         view.addSubview(view1)
         limberjackBehavior.addItem(view1)
         
-        let attachment = UIAttachmentBehavior(
-            item: view2,
-            offsetFromCenter: UIOffset(horizontal: 0, vertical: view2.frame.height / 2),
-            attachedTo: view1,
-            offsetFromCenter: UIOffset(horizontal: 0, vertical: -view1.frame.height / 2 + offsetBy)
+        let attachment = UIAttachmentBehavior.pinAttachment(
+            with: view1,
+            attachedTo: view2,
+            attachmentAnchor: CGPoint(x: view1.center.x, y: view1.frame.origin.y + offsetBy)
         )
+        attachment.frictionTorque = friction
+        attachment.attachmentRange = range
         animator.addBehavior(attachment)
     }
 }
