@@ -75,7 +75,8 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
         addSubviews()
         setBackgroundColors()
         createAttachments()
-        
+
+        limberjackBehavior.collisionBehavior.translatesReferenceBoundsIntoBoundary = false  // don't bound off walls
         limberjackBehavior.collisionBehavior.collisionDelegate = self
     }
 
@@ -112,8 +113,8 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
                                   startAngle: 0.0,
                                   endAngle: 2.0 * CGFloat.pi,
                                   clockwise: true)
-//        let circle = UIBezierPath(ovalIn: barView.frame)
         limberjackBehavior.collisionBehavior.addBoundary(withIdentifier: NSString("bar"), for: circle)
+        limberjackBehavior.collisionBehavior.translatesReferenceBoundsIntoBoundary = true  // bounce off walls
 
         // make all limbs visible
         leftHandView.backgroundColor = .blue
@@ -204,10 +205,14 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
 
     // MARK: - UICollisionBehaviorDelegate
     
+    // called at end of each contact, including after beginning to fall, when hand
+    // is finally beyond contact zone around bar
     func collisionBehavior(_ behavior: UICollisionBehavior, endedContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?) {
         if falling { freeOfBar = true }
     }
     
+    // called when any part of body contacts zone around bar
+    // note: this is called several times when body begins to fall away from bar
     func collisionBehavior(_ behavior: UICollisionBehavior, beganContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?, at p: CGPoint) {
         if freeOfBar {
             if let id = identifier as? NSString, id == "bar" {
