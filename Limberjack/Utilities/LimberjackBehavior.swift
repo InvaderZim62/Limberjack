@@ -19,14 +19,13 @@ class LimberjackBehavior: UIDynamicBehavior {
     lazy var itemBehavior: UIDynamicItemBehavior = {
         let behavior = UIDynamicItemBehavior()
         behavior.allowsRotation = true
-        behavior.elasticity = 0.7
-        behavior.resistance = 0.5
+        behavior.elasticity = 0.3  // elastisity of collisions
+        behavior.resistance = 0.5  // resitance to movement (drag)
         return behavior
     }()
     
     lazy var gravityBehavior: UIGravityBehavior = {
         let behavior = UIGravityBehavior()
-        behavior.magnitude = 1.0
         return behavior
     }()
     

@@ -35,7 +35,7 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     let wristRange = UIFloatRange(minimum: -1.0, maximum: 1.0)
     let elbowRange = UIFloatRange(minimum: 0.0, maximum: 2.0)
     let shoulderRange = UIFloatRange(minimum: -CGFloat.pi, maximum: CGFloat.pi)
-    let hipRange = UIFloatRange(minimum: -2.8, maximum: 1.0)  // radians, positive bends backwards
+    let hipRange = UIFloatRange(minimum: -2.8, maximum: 1.0)  // radians, min is forward bend, max is backward bend
     let kneeRange = UIFloatRange(minimum: 0.0, maximum: 2.0)
 
     let barView = BarView(frame: CGRect(x: 0, y: 0,
@@ -89,6 +89,8 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
             motionManager.startAccelerometerUpdates(to: .main) { (data, error) in
                 if let x = data?.acceleration.x, let y = data?.acceleration.y {
                     self.limberjackBehavior.gravityBehavior.gravityDirection = CGVector(dx: x, dy: -y)
+                    // note: if you want to change gravityBehavior.magnitude, it has to be after
+                    // gravityDirection is set, or by scaling the accels going into gravityDirection
                 }
             }
         }
@@ -102,29 +104,33 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     // MARK: - Gestures
 
     @objc private func handleTap(recognizer: UITapGestureRecognizer) {
-        // let go of bar
-        animator.removeBehavior(leftHandAttachment)
-        animator.removeBehavior(rightHandAttachment)
-        falling = true
-
-        // once falling, make bar region collideable
-        let circle = UIBezierPath(arcCenter: barView.center,
-                                  radius: Constants.barRadius,
-                                  startAngle: 0.0,
-                                  endAngle: 2.0 * CGFloat.pi,
-                                  clockwise: true)
-        limberjackBehavior.collisionBehavior.addBoundary(withIdentifier: NSString("bar"), for: circle)
-        limberjackBehavior.collisionBehavior.translatesReferenceBoundsIntoBoundary = true  // bounce off walls
-
-        // make all limbs visible
-        leftHandView.backgroundColor = .blue
-        leftForearmView.backgroundColor = .blue
-        leftBiseptView.backgroundColor = .blue
-        rightHandView.backgroundColor = .blue
-        rightForearmView.backgroundColor = .blue
-        rightBiseptView.backgroundColor = .blue
-        rightThighView.backgroundColor = .blue
-        rightShinView.backgroundColor = .blue
+        if freeOfBar {
+            reattachToBar()
+        } else {
+            // let go of bar
+            animator.removeBehavior(leftHandAttachment)
+            animator.removeBehavior(rightHandAttachment)
+            falling = true
+            
+            // once falling, make bar region collideable
+            let circle = UIBezierPath(arcCenter: barView.center,
+                                      radius: Constants.barRadius,
+                                      startAngle: 0.0,
+                                      endAngle: 2.0 * CGFloat.pi,
+                                      clockwise: true)
+            limberjackBehavior.collisionBehavior.addBoundary(withIdentifier: NSString("bar"), for: circle)
+            limberjackBehavior.collisionBehavior.translatesReferenceBoundsIntoBoundary = true  // bounce off walls
+            
+            // make all limbs visible
+            leftHandView.backgroundColor = .blue
+            leftForearmView.backgroundColor = .blue
+            leftBiseptView.backgroundColor = .blue
+            rightHandView.backgroundColor = .blue
+            rightForearmView.backgroundColor = .blue
+            rightBiseptView.backgroundColor = .blue
+            rightThighView.backgroundColor = .blue
+            rightShinView.backgroundColor = .blue
+        }
     }
     
     // MARK: - Helper Functions
@@ -171,6 +177,22 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
         attach(topOf: leftShinView, offsetBy: 0.0, toBottomOf: leftThighView, range: kneeRange, friction: 0.04)
         attach(topOf: rightShinView, offsetBy: 0.0, toBottomOf: rightThighView, range: kneeRange, friction: 0.04)
     }
+    
+    private func reattachToBar() {
+        falling = false
+        freeOfBar = false
+        limberjackBehavior.collisionBehavior.removeBoundary(withIdentifier: NSString("bar"))
+        limberjackBehavior.collisionBehavior.translatesReferenceBoundsIntoBoundary = false
+        animator.addBehavior(leftHandAttachment)
+        animator.addBehavior(rightHandAttachment)
+        leftHandAttachment.length = 2
+        rightHandAttachment.length = 2
+        rightHandView.backgroundColor = .clear
+        rightForearmView.backgroundColor = .clear
+        rightBiseptView.backgroundColor = .clear
+        rightThighView.backgroundColor = .clear
+        rightShinView.backgroundColor = .clear
+    }
 
     private func attach(topOf view1: UIView, to point: CGPoint) -> UIAttachmentBehavior {
         view1.center = CGPoint(x: point.x,
@@ -194,12 +216,13 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
                                y: view2.center.y + view2.bounds.midY + view1.bounds.midY - offsetBy)
         limberjackBehavior.addItem(view1)
         
+        // pinAttachment is the only kind that has frictionTorque and attachmentRange properties
         let attachment = UIAttachmentBehavior.pinAttachment(
             with: view1, attachedTo: view2,
             attachmentAnchor: CGPoint(x: view1.center.x, y: view1.frame.origin.y + offsetBy)
         )
         attachment.frictionTorque = friction
-        attachment.attachmentRange = range
+        attachment.attachmentRange = range  // relative rotational range in radians
         animator.addBehavior(attachment)
     }
 
@@ -209,15 +232,6 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     // is finally beyond contact zone around bar
     func collisionBehavior(_ behavior: UICollisionBehavior, endedContactFor item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?) {
         if falling { freeOfBar = true }
-        if !view.superview!.bounds.contains(leftForearmView.frame) {
-            print("left forearm out of bounds")
-        } else if !view.superview!.bounds.contains(rightForearmView.frame) {
-            print("right forearm out of bounds")
-        } else if !view.superview!.bounds.contains(leftHandView.frame) {
-            print("left hand out of bounds")
-        } else if !view.superview!.bounds.contains(rightHandView.frame) {
-            print("right hand out of bounds")
-        }
     }
     
     // called when any part of body contacts edges of screen or zone around bar
@@ -227,19 +241,7 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
             if let id = identifier as? NSString, id == "bar" {
                 if let contactor = item as? UIView {
                     if contactor == leftHandView || contactor == rightHandView {
-                        falling = false
-                        freeOfBar = false
-                        limberjackBehavior.collisionBehavior.removeBoundary(withIdentifier: NSString("bar"))
-                        animator.addBehavior(leftHandAttachment)
-                        animator.addBehavior(rightHandAttachment)
-                        leftHandAttachment.length = 2
-                        rightHandAttachment.length = 2
-                        limberjackBehavior.collisionBehavior.translatesReferenceBoundsIntoBoundary = false
-                        rightHandView.backgroundColor = .clear
-                        rightForearmView.backgroundColor = .clear
-                        rightBiseptView.backgroundColor = .clear
-                        rightThighView.backgroundColor = .clear
-                        rightShinView.backgroundColor = .clear
+                        reattachToBar()
                     }
                 }
             }
