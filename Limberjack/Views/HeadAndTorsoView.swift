@@ -13,7 +13,7 @@ class HeadAndTorsoView: UIView {
     override func draw(_ rect: CGRect) {
         
         let headCenter = CGPoint(x: frame.width / 2, y: Constants.headRadius + Constants.lineWidth)
-        let neckPoint = CGPoint(x: frame.width / 2, y: Constants.headRadius * 2 + Constants.lineWidth)
+        let neckTop = CGPoint(x: frame.width / 2, y: Constants.headRadius * 2 + Constants.lineWidth)
         let torsoBottom = CGPoint(x: frame.width / 2, y: frame.height)
 
         let circle = UIBezierPath(arcCenter: headCenter,
@@ -26,7 +26,7 @@ class HeadAndTorsoView: UIView {
         circle.stroke()
         
         let line = UIBezierPath()
-        line.move(to: neckPoint)
+        line.move(to: neckTop)
         line.addLine(to: torsoBottom)
         line.lineWidth = Constants.lineWidth
         line.stroke()
