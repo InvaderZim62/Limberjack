@@ -6,6 +6,6 @@ I created this app to demonstrate the use of Dynamic Animation, by building a st
 The figure is subject to gravity, and the direction of gravity is determined by the orientation of the
 iPhone.
 
-![Limberjack](https://github.com/InvaderZim62/Limberjack/assets/34785252/0dc633ce-d6f7-4d6d-9932-d878b84b415e)
+![Limberjack](https://github.com/InvaderZim62/Limberjack/assets/34785252/23345d75-109d-4921-a319-27c608d7b8a0)
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-![Limberjack](https://github.com/InvaderZim62/Limberjack/assets/34785252/55457f6d-0af2-4553-8627-502018bb40c2)
+![Limberjack](https://github.com/InvaderZim62/Limberjack/assets/34785252/9149f9cb-b2e1-4ccb-8ddb-a93e548ad450)
