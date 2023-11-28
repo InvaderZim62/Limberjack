@@ -113,7 +113,7 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
             animator.removeBehavior(rightHandAttachment)
             falling = true
             
-            // once falling, make bar region collideable
+            // once falling, make bar region collidable
             let circle = UIBezierPath(arcCenter: barView.center,
                                       radius: Constants.barRadius,
                                       startAngle: 0.0,

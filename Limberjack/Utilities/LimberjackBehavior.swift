@@ -5,6 +5,12 @@
 //  Created by Phil Stern on 8/30/19.
 //  Copyright © 2019 Phil Stern. All rights reserved.
 //
+//  Dynamic Animation
+//  - add items (views) to child behaviors (collision, dynamic item, gravity)
+//  - add child behaviors to parent behavior (LimberJackBehavior)
+//  - add parent behavior to animator
+//  - add attachment behaviors (between pairs of views) to animator (in LimberjackViewController)
+//
 
 import UIKit
 
