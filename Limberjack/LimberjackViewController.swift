@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import CoreMotion
+import CoreMotion  // needed for accelerometers
 
 struct Constants {
     static let barPoint = CGPoint(x: 190, y: 250)  // in animator's reference view coordinates
@@ -57,7 +57,7 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
     let rightShinView = UIView(frame: CGRect(x: 0, y: 0, width: Constants.lineWidth, height: Constants.shinLength))
 
     let motionManager = CMMotionManager()  // needed for accelerometers
-    lazy var animator = UIDynamicAnimator(referenceView: view)
+    lazy var animator = UIDynamicAnimator(referenceView: view)  // view provides the coordinate system
     lazy var limberjackBehavior = LimberjackBehavior(in: animator)
     
     // MARK: - Lifecycle
@@ -77,8 +77,8 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
         setBackgroundColors()  // hide right limbs when hanging on bar
         createAttachments()
 
-        limberjackBehavior.collisionBehavior.translatesReferenceBoundsIntoBoundary = false  // don't collide with walls while hanging
-        limberjackBehavior.collisionBehavior.collisionDelegate = self
+        limberjackBehavior.collisionBehavior.translatesReferenceBoundsIntoBoundary = false  // don't collide with walls (view bounds) while hanging
+        limberjackBehavior.collisionBehavior.collisionDelegate = self  // calls func collisionBehavior below, during collisions
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -218,7 +218,7 @@ class LimberjackViewController: UIViewController, UICollisionBehaviorDelegate {
         
         view1.center = CGPoint(x: view2.center.x,
                                y: view2.center.y + view2.bounds.midY + view1.bounds.midY - offsetBy)
-        limberjackBehavior.addItem(view1)
+        limberjackBehavior.addItem(view1)  // must be added after setting position
         
         // pinAttachment is the only kind that has frictionTorque and attachmentRange properties
         let attachment = UIAttachmentBehavior.pinAttachment(
